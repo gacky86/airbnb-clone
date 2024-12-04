@@ -50,4 +50,4 @@ jobs:
           aws ecs wait services-stable --cluster ${{ env.CLUSTER_NAME }} --service ${{ env.SERVICE_NAME }}
           aws ecs describe-services --cluster ${{ env.CLUSTER_NAME }} --service ${{ env.SERVICE_NAME }}
 
-# test5
+# test6
