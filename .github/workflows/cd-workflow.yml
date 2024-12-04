@@ -2,7 +2,7 @@ name: push image to ECR and deploy to ECS
 on:
   pull_request:
     branches:
-      - main
+      - master
     types: [closed]
 
 jobs:
