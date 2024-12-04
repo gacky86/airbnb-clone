@@ -38,8 +38,8 @@ jobs:
         run: |
           docker build . --tag ${{ env.REGISTRY }}/${{ env.REPOSITORY }}:${{ env.IMAGE_TAG }}
           docker push ${{ env.REGISTRY }}/${{ env.REPOSITORY }}:${{ env.IMAGE_TAG }}
-          docker tag ${{ env.REGISTRY }}/${{ env.REPOSITORY }}:${{ env.IMAGE_TAG }} ${{ env.REGISTRY }}/${{ env.REPOSITORY }}:latest
-          docker push ${{ env.REGISTRY }}/${{ env.REPOSITORY }}:latest
+          docker tag ${{ env.REGISTRY }}/${{ env.REPOSITORY }}:${{ env.IMAGE_TAG }}
+          docker push ${{ env.REGISTRY }}/${{ env.REPOSITORY }}:${{ env.IMAGE_TAG }}
 
       - name: Force new deployment and wait for services stability in ECS
         env:
@@ -50,4 +50,4 @@ jobs:
           aws ecs wait services-stable --cluster ${{ env.CLUSTER_NAME }} --service ${{ env.SERVICE_NAME }}
           aws ecs describe-services --cluster ${{ env.CLUSTER_NAME }} --service ${{ env.SERVICE_NAME }}
 
-# test6
+# test7
