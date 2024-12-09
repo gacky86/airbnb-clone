@@ -14,8 +14,12 @@ development:
 
 test:
   <<: *default
-  database: test
+  adapter: postgresql
+  encoding: unicode
+  username: postgres
   password: password
+  host: localhost
+  database: test
 
 production:
   <<: *default
