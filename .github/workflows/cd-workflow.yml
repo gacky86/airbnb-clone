@@ -1,10 +1,14 @@
 name: push image to ECR and deploy to ECS
+# on:
+#   pull_request:
+#     branches:
+#       - master
+#     types: [closed]
+# 現在、本番環境へのデプロイは行わないのでワークフローの停止
 on:
-  pull_request:
-    branches:
-      - master
-    types: [closed]
-
+  push:
+    branches-ignore:
+      - '**'
 jobs:
   push:
     name: push image to ECR and deploy to ECS
