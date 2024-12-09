@@ -1,60 +1,67 @@
-# This workflow uses actions that are not certified by GitHub.  They are
-# provided by a third-party and are governed by separate terms of service,
-# privacy policy, and support documentation.
-#
-# This workflow will install a prebuilt Ruby version, install dependencies, and
-# run tests and linters.
-name: "Ruby on Rails CI"
+name: test flow # ワークフローの名前
+
 on:
-  push:
-    branches: [ "master" ]
-  pull_request:
-    branches: [ "master" ]
+  [push] # プッシュしたらとりま実行する
+
 jobs:
-  test:
+  rspec:
     runs-on: ubuntu-latest
     services:
-      postgres:
-        image: postgres:11-alpine
-        ports:
-          - "5432:5432"
+      postgres: #ここの情報がdatabase.ymlのtest用と一致している必要がある
         env:
-          POSTGRES_DB: rails_test
-          POSTGRES_USER: rails
           POSTGRES_PASSWORD: password
-    env:
-      RAILS_ENV: test
-      DATABASE_URL: "postgres://rails:password@localhost:5432/rails_test"
+          POSTGRES_DB: test
+        image: postgres
+        ports:
+          - 5432:5432
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
-      # Add or replace dependency steps here
-      - name: Install Ruby and gems
-        uses: ruby/setup-ruby@78c01b705fd9d5ad960d432d3a0cfa341d50e410 # v1.179.1
+        uses: actions/checkout@v2
+
+      - name: Setting up ruby
+        uses: ruby/setup-ruby@v1
         with:
           bundler-cache: true
-      # Add or replace database setup steps here
-      - name: Set up database schema
-        run: bin/rails db:schema:load
-      # Add or replace test runners here
-      - name: Run tests
-        run: bin/rake
 
-  lint:
+      - name: Bundler and gem install
+        run: |
+          gem install bundler
+          bundle install --path vendor/bundle
+
+      - name: Database create and migrate
+        run: |
+          bundle exec rails db:create RAILS_ENV=test
+          bundle exec rails db:migrate RAILS_ENV=test
+
+      - name: assets precompile
+        run: bundle exec rake assets:precompile RAILS_ENV=test
+
+      - name: Run tests
+        run: |
+          bundle exec rspec
+
+# gem install error_highlight -v "0.7.0" が無いとDatabase create and migrateで
+# バージョンに関するコンフリクトが発生する
+# と言うのは嘘で、bundle installをローカルで実行してGemfile.lockを更新してあげないと
+# github actionsでbundle cacheを使用するときに参考にするGemfile.lockがold versionになってしまって
+# 結果的にgithub actionsのVM上で、バージョンのコンフリクトをGemfileからのbundle installとGemfile.lockで起こしてしまう
+
+  rubocop:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
-      - name: Install Ruby and gems
-        uses: ruby/setup-ruby@78c01b705fd9d5ad960d432d3a0cfa341d50e410 # v1.179.1
+        uses: actions/checkout@v2
+
+      - name: Set up Ruby
+        uses: ruby/setup-ruby@v1
         with:
           bundler-cache: true
-      - name: Generate binstubs
-        run: bundle binstubs bundler-audit brakeman rubocop
-      # Add or replace any other lints here
-      - name: Security audit dependencies
-        run: bin/bundler-audit --update
-      - name: Security audit application code
-        run: bin/brakeman -q -w2
-      - name: Lint Ruby files
-        run: bin/rubocop --parallel
+
+      # - name: Bundler and gem install
+      #   run: |
+      #     gem install bundler
+      #     gem install error_highlight -v "0.7.0"
+      #     bundle install --path vendor/bundle
+
+      - name: Run rubocop
+        run: bundle exec rubocop

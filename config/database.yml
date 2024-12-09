@@ -8,12 +8,14 @@ default: &default
 
 development:
   <<: *default
-  database: myapp_development
+  database: development
+  password: password
 
 
 test:
   <<: *default
-  database: myapp_test
+  database: test
+  password: password
 
 production:
   <<: *default
